@@ -1,19 +1,26 @@
-const mysql = require('mysql2');
+const mysqlClient = require('mariasql');
 const http = require('http');
 
-const connection = mysql.createConnection({host:'localhost', user: 'root', database: 'test', password: 'pwd'});
+const mysql = new mysqlClient({
+    host: '127.0.0.1',
+    user: 'root',
+    password: 'pwd',
+    db: 'test',
+    charset: 'utf8'
+});
+
 function mysqlQuery(query, cb) {
-    connection.query(query, function (err, results, fields) {
-        cb({err, results, fields});
+    mysql.query(query, function (err, rows) {
+        cb({err, rows});
     });
 }
 
 function generatePage(res) {
     const time = process.hrtime();
-    mysqlQuery("SELECT * FROM `users`", ({err, results, fields}) => {
+    mysqlQuery("SELECT * FROM `users`", ({err, rows}) => {
         let response = '';
-        for (let i = 0; i < results.length; i++) {
-            response += `<span>Hello <i>${results[i].login}!</i> </span>`;
+        for (let i = 0; i < rows.length; i++) {
+            response += `<span>Hello <i>${rows[i].login}!</i> </span>`;
         }
         const diff = process.hrtime(time);
         const generationTime = diff[1] / 1000000;
